@@ -1,0 +1,29 @@
+.button {
+  padding: var(--ye-spacing-rem-xsmall) var(--ye-spacing-rem-small);
+  border-radius: var(--ye-radius-small);
+  border: none;
+  cursor: pointer;
+  margin-top: var(--ye-spacing-rem-small);
+}
+
+.button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.primary {
+    background-color: var(--color-primary);
+    color: var(--color-canvas);
+}
+
+.outlined {
+    background-color: transparent;
+    color: var(--color-primary);
+    border: 1px solid var(--color-primary);
+}
+
+.negative {
+    background-color: transparent;
+    color: var(--color-negative);
+    border: 1px solid var(--color-negative);
+}

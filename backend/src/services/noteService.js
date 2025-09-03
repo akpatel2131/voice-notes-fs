@@ -19,30 +19,14 @@ const getAllNotes = async () => {
 };
 
 
-const createNote = async (audioPath, title, duration, transcript = null) => {
-  let finalTranscript;
-
-  if (transcript && transcript.trim().length > 0) {
-    finalTranscript = transcript;
-  } else {
-    try {
-      finalTranscript = await GeminiAIService.transcribeAudio(audioPath);
-    } catch (error) {
-      console.error('Transcription failed:', error.message || error);
-      throw new Error(
-        'Could not transcribe audio. Please provide transcript manually or use browser speech recognition.'
-      );
-    }
-  }
-
-  const note = new Note({
-    title: title?.trim() || `Voice Note ${Date.now()}`,
-    transcript: finalTranscript,
-    audioPath: audioPath || 'browser-speech',
-    duration: Number(duration) || 0,
+const createNote = async (title, duration, transcript = null) => {
+  const note = Note.create({
+    title: title?.trim(),
+    transcript: transcript,
+    duration: Number(duration)
   });
 
-  await note.save();
+  console.log({note})
   return note;
 };
 

@@ -2,19 +2,21 @@ const noteService = require('../services/noteService');
 
 const getAllNotes = async (req, res) => {
   try {
+    console.log("Fetching all notes");
     const notes = await noteService.getAllNotes();
     res.json(notes);
   } catch (error) {
+    console.error('Get all notes error:', error);
     res.status(500).json({ error: error.message });
   }
 };
 
 const createNote = async (req, res) => {
   try {
-    if (!req.file) return res.status(400).json({ error: 'Audio file is required' });
+    console.log("Creating note", req.body);
 
-    const { title, duration } = req.body;
-    const note = await noteService.createNote(req.file.path, title, duration);
+    const { title, duration, transcript } = req.body;
+    const note = await noteService.createNote(title, duration, transcript);
 
     res.status(201).json(note);
   } catch (error) {

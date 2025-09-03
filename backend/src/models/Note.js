@@ -14,10 +14,6 @@ const noteSchema = new mongoose.Schema({
     type: String,
     default: null
   },
-  audioPath: {
-    type: String,
-    required: true
-  },
   duration: {
     type: Number,
     default: 0

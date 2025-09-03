@@ -1,0 +1,85 @@
+.noteCard {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    padding: 16px;
+    margin: 12px 0;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    cursor: pointer;
+  }
+  
+  .noteCard:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  }
+  
+  .noteCard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .noteCardTitle {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #222;
+  }
+  
+  .noteCardTime {
+    font-size: 0.85rem;
+    color: #666;
+  }
+  
+  .noteCardBody {
+    margin-top: 10px;
+    color: #444;
+    line-height: 1.4;
+    font-size: 0.95rem;
+  }
+  
+  .noteCardSummary {
+    margin-top: 12px;
+    padding: 10px;
+    background: #f7f9fc;
+    border-left: 4px solid #4a90e2;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    color: #333;
+  }
+  
+  .noteCardActions {
+    margin-top: 14px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+  }
+  
+  .noteCardActions button {
+    border: none;
+    outline: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 500;
+    transition: background 0.2s;
+  }
+  
+  .noteCardActions .editButton {
+    background: #f0f4ff;
+    color: #2a55e5;
+  }
+  
+  .noteCardActions .editButton:hover {
+    background: #dbe3ff;
+  }
+  
+  .noteCardActions .deleteButton {
+    background: #ffecec;
+    color: #d9534f;
+  }
+  
+  .noteCardActions .deleteButton:hover {
+    background: #ffd6d6;
+  }
+  
