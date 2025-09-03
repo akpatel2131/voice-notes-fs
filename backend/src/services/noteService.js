@@ -1,45 +1,52 @@
-const Note = require('../models/Note');
-const GeminiAIService = require('./aiService');
-const fs = require('fs').promises;
-const generateLocalSummary = require('../utils/summary');
+const Note = require("../models/Note");
+const GeminiAIService = require("./aiService");
+const fs = require("fs").promises;
+const generateLocalSummary = require("../utils/summary");
+const AppError = require("../utils/appError");
 
 const getAllNotes = async () => {
   return await Note.find().sort({ createdAt: -1 });
 };
 
-
 const createNote = async (title, duration, transcript = null) => {
-  const note = await Note.create({
-    title: title?.trim(),
-    transcript: transcript,
-    duration: Number(duration)
-  });
-  return note;
+  try {
+    const note = await Note.create({
+      title: title?.trim(),
+      transcript: transcript,
+      duration: Number(duration),
+    });
+    return note;
+  } catch (error) {
+    throw AppError(error);
+  }
 };
 
 const updateNote = async (id, { transcript, title }) => {
-  const note = await Note.findById(id);
-  if (!note) return null;
+  try {
+    const note = await Note.findById(id);
+    if (!note) throw AppError("Note not found", 404);
 
-  if (transcript) note.transcript = transcript;
-  if (title) note.title = title;
+    if (transcript) note.transcript = transcript;
+    if (title) note.title = title;
 
-  note.isEdited = true;
-  note.summary = null;
+    note.isEdited = true;
+    note.summary = null;
 
-  await note.save();
-  return note;
+    await note.save();
+    return note;
+  } catch (error) {
+    throw AppError(error);
+  }
 };
 
 const generateSummary = async (id) => {
-  const note = await Note.findById(id);
-  if (!note) return null;
-
-  if (note.summary && !note.isEdited) {
-    return note.summary;
-  }
-
   try {
+    const note = await Note.findById(id);
+    if (!note) throw AppError("Note not found", 404);
+
+    if (note.summary && !note.isEdited) {
+      return note.summary;
+    }
     const summary = await GeminiAIService.generateSummary(note.transcript);
 
     note.summary = summary;
@@ -48,32 +55,31 @@ const generateSummary = async (id) => {
 
     return summary;
   } catch (error) {
-    console.error('Summary generation failed, using fallback:', error.message || error);
-
-    const fallbackSummary = generateLocalSummary(note.transcript);
-
-    note.summary = fallbackSummary;
-    note.isEdited = false;
-    await note.save();
-
-    return fallbackSummary;
+    throw AppError(error);
   }
 };
 
 const deleteNote = async (id) => {
-  const note = await Note.findById(id);
-  if (!note) return null;
+  try {
+    const note = await Note.findById(id);
+    if (!note) throw AppError("Note not found", 404);
 
-  if (note.audioPath && note.audioPath !== 'browser-speech') {
-    try {
-      await fs.unlink(note.audioPath);
-    } catch (fileError) {
-      console.error('Error deleting audio file:', fileError.message || fileError);
+    if (note.audioPath && note.audioPath !== "browser-speech") {
+      try {
+        await fs.unlink(note.audioPath);
+      } catch (fileError) {
+        console.error(
+          "Error deleting audio file:",
+          fileError.message || fileError
+        );
+      }
     }
-  }
 
-  await Note.findByIdAndDelete(id);
-  return true;
+    await Note.findByIdAndDelete(id);
+    return true;
+  } catch (error) {
+    throw AppError(error);
+  }
 };
 
 module.exports = {

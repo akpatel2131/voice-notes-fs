@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import styles from "./editModal.module.css";
 import Button from "../uiComponents/Button/Button";
 import Modal from "../uiComponents/Modal/Modal";
@@ -14,10 +14,10 @@ const EditModal = ({ note, isOpen, onClose, onSave }) => {
     }
   }, [note]);
 
-  const handleSave = () => {
-    onSave(note._id, { title, transcript });
+  const handleSave = useCallback(async () => {
+    await onSave(note._id, { title, transcript });
     onClose();
-  };
+  }, [note, title, transcript, onSave, onClose]);
 
   return (
     <Modal title="Edit Note" onClose={onClose} isOpen={isOpen}>

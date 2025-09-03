@@ -1,6 +1,9 @@
 import React, { useState, useRef, useCallback } from "react";
 import { notesAPI } from "../services/api";
 import styles from "./voiceRecorder.module.css";
+import { toast } from "react-toastify";
+import { catchFormError } from "../uiComponents/catchFormError";
+import { autoClose } from "../App";
 
 const VoiceRecorder = ({ onNoteCreated }) => {
   const [isRecording, setIsRecording] = useState(false);
@@ -18,7 +21,9 @@ const VoiceRecorder = ({ onNoteCreated }) => {
         window.SpeechRecognition || window.webkitSpeechRecognition;
 
       if (!SpeechRecognition) {
-        alert("Speech recognition not supported in this browser.");
+        toast.error("Speech recognition not supported in this browser.", {
+          autoClose,
+        });
         return;
       }
 
@@ -33,17 +38,22 @@ const VoiceRecorder = ({ onNoteCreated }) => {
       };
 
       recognition.onerror = (event) => {
-        alert("Speech recognition error:", event.error);
+        toast.error(`Speech recognition error: ${event.error}`, {
+          autoClose,
+        });
       };
 
       recognition.start();
       setIsRecording(true);
+      setTranscript("");
 
       timerRef.current = setInterval(() => {
         setDuration((prev) => prev + 1);
       }, 1000);
     } catch (error) {
-      alert("Could not start speech recognition.");
+      toast.error(catchFormError(error).message, {
+        autoClose,
+      });
     }
   }, []);
 
@@ -54,6 +64,13 @@ const VoiceRecorder = ({ onNoteCreated }) => {
       clearInterval(timerRef.current);
 
       setIsProcessing(true);
+      if (!transcript) {
+        toast.error("No transcript available", {
+          autoClose,
+        });
+        setIsProcessing(false);
+        return;
+      }
       try {
         const newNote = await notesAPI.createNote({
           title: title || `Voice Note ${Date.now()}`,
@@ -62,8 +79,13 @@ const VoiceRecorder = ({ onNoteCreated }) => {
         });
         onNoteCreated(newNote);
         setTitle("");
+        toast.success("Note created successfully", {
+          autoClose,
+        });
       } catch (error) {
-        alert("Failed to save voice note. Please try again.");
+        toast.error(catchFormError(error).message, {
+          autoClose,
+        });
       } finally {
         setDuration(0);
         setIsProcessing(false);
@@ -91,13 +113,17 @@ const VoiceRecorder = ({ onNoteCreated }) => {
               Recording: {formatTime(duration)}
             </div>
           )}
-          {isProcessing && <div className={styles.processing}>Processing...</div>}
+          {isProcessing && (
+            <div className={styles.processing}>Processing...</div>
+          )}
         </div>
 
         <button
           onClick={isRecording ? stopRecording : startRecording}
           disabled={isProcessing}
-          className={styles.recordButton + " " + (isRecording ? styles.recording : "")}
+          className={
+            styles.recordButton + " " + (isRecording ? styles.recording : "")
+          }
         >
           {isRecording ? "Stop Recording" : "Start Recording"}
         </button>

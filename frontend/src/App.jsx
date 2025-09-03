@@ -1,11 +1,17 @@
-import React, { useState, useEffect } from 'react';
-import VoiceRecorder from './components/VoiceRecorder';
-import NoteCard from './components/NoteCard';
-import EditModal from './components/EditModal';
-import { notesAPI } from './services/api';
-import styles from './app.module.css';
+import React, { useState, useEffect, useCallback } from "react";
+import VoiceRecorder from "./components/VoiceRecorder";
+import NoteCard from "./components/NoteCard";
+import EditModal from "./components/EditModal";
+import { notesAPI } from "./services/api";
+import styles from "./app.module.css";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { toast } from "react-toastify";
+import { catchFormError } from "./uiComponents/catchFormError";
 
-function App() {
+export const autoClose = 5000;
+
+function Home() {
   const [notes, setNotes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editingNote, setEditingNote] = useState(null);
@@ -15,57 +21,66 @@ function App() {
     fetchNotes();
   }, []);
 
-  const fetchNotes = async () => {
+  const fetchNotes = useCallback(async () => {
     try {
       const fetchedNotes = await notesAPI.getAllNotes();
       setNotes(fetchedNotes);
+      toast.success("Notes fetched successfully", {
+        autoClose,
+    });
     } catch (error) {
-      alert(error)
+      toast.error(catchFormError(error).message, {
+        autoClose,
+    });
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const handleNoteCreated = (newNote) => {
-    setNotes(prev => [newNote, ...prev]);
-  };
+  const handleNoteCreated = useCallback((newNote) => {
+    setNotes((prev) => [newNote, ...prev]);
+  }, []);
 
   const handleEditNote = (note) => {
     setEditingNote(note);
     setIsEditModalOpen(true);
   };
 
-  const handleSaveEdit = async (noteId, updatedData) => {
+  const handleSaveEdit = useCallback(async (noteId, updatedData) => {
     try {
       const updatedNote = await notesAPI.updateNote(noteId, updatedData);
-      setNotes(prev => prev.map(note => 
-        note._id === noteId ? updatedNote : note
-      ));
+      setNotes((prev) =>
+        prev.map((note) => (note._id === noteId ? updatedNote : note))
+      );
     } catch (error) {
-      alert('Failed to update note. Please try again.');
+      toast.error(catchFormError(error).message, {
+        autoClose,
+    });
     }
-  };
+  }, []);
 
-  const handleDeleteNote = async (noteId) => {
+  const handleDeleteNote = useCallback(async (noteId) => {
     try {
       await notesAPI.deleteNote(noteId);
-      setNotes(prev => prev.filter(note => note._id !== noteId));
+      setNotes((prev) => prev.filter((note) => note._id !== noteId));
     } catch (error) {
-      alert('Failed to delete note. Please try again.');
+      toast.error(catchFormError(error).message, {
+        autoClose,
+    });
     }
-  };
+  }, []);
 
-  const handleUpdateNote = (noteId, updatedNote) => {
-    setNotes(prev => prev.map(note => 
-      note._id === noteId ? updatedNote : note
-    ));
-  };
+  const handleUpdateNote = useCallback((noteId, updatedNote) => {
+    setNotes((prev) =>
+      prev.map((note) => (note._id === noteId ? updatedNote : note))
+    );
+  }, []);
 
   return (
     <div className={styles.app}>
       <div className={styles.container}>
         <VoiceRecorder onNoteCreated={handleNoteCreated} />
-        
+
         <div className={styles.notesSection}>
           {loading ? (
             <div className={styles.loading}>Loading notes...</div>
@@ -73,9 +88,9 @@ function App() {
             <div className={styles.emptyState}>
               <p>No voice notes yet. Record your first note above!</p>
             </div>
-          ) : (
+          ) : notes ?(
             <div className={styles.notesGrid}>
-              {notes.map(note => (
+              {notes.map((note) => (
                 <NoteCard
                   key={note._id}
                   note={note}
@@ -85,6 +100,8 @@ function App() {
                 />
               ))}
             </div>
+          ) : (
+           null
           )}
         </div>
 
@@ -96,6 +113,15 @@ function App() {
         />
       </div>
     </div>
+  );
+}
+
+function App() {
+  return (
+    <>
+      <Home />
+      <ToastContainer closeButton={false} closeOnClick />
+    </>
   );
 }
 

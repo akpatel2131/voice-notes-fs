@@ -4,12 +4,15 @@ import styles from "./noteCard.module.css";
 import Button from "../uiComponents/Button/Button";
 import Modal from "../uiComponents/Modal/Modal";
 import { format } from "date-fns";
+import { toast } from "react-toastify";
+import { catchFormError } from "../uiComponents/catchFormError";
+import { autoClose } from "../App";
 
 const NoteCard = ({ note, onEdit, onDelete, onUpdate }) => {
   const [isGeneratingSummary, setIsGeneratingSummary] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
-  const handleGenerateSummary = async () => {
+  const handleGenerateSummary = useCallback(async () => {
     setIsGeneratingSummary(true);
     try {
       const response = await notesAPI.generateSummary(note._id);
@@ -18,30 +21,26 @@ const NoteCard = ({ note, onEdit, onDelete, onUpdate }) => {
         summary: response.summary,
         isEdited: false,
       });
+      toast.success("Summary generated successfully", {
+        autoClose,
+    });
     } catch (error) {
-      alert("Failed to generate summary. Please try again.");
+      toast.error(catchFormError(error).message, {
+        autoClose,
+    });
     } finally {
       setIsGeneratingSummary(false);
     }
-  };
-
-  const formatDuration = (seconds) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    if (mins) {
-      return `${mins}:${secs.toString().padStart(2, "0")} Min`;
-    }
-    return `${secs.toString().padStart(2, "0")} Sec`;
-  };
+  }, [note, onUpdate]);
 
   const handleDeleteModalClose = useCallback(() => {
     setIsDeleteModalOpen((prev) => !prev);
-  },[]);
+  }, [setIsDeleteModalOpen]);
 
   const handleDelete = useCallback(() => {
     onDelete(note._id);
     handleDeleteModalClose();
-  },[onDelete, note._id, handleDeleteModalClose]);
+  }, [onDelete, note._id, handleDeleteModalClose]);
 
   return (
     <>
@@ -52,11 +51,6 @@ const NoteCard = ({ note, onEdit, onDelete, onUpdate }) => {
             <span className={styles.noteMetaTime}>
               {format(note.createdAt, "dd MMM yyyy")}
             </span>
-            {note.duration > 0 && (
-              <span className={styles.noteMetaDuration}>
-                Duration: {formatDuration(note.duration)}
-              </span>
-            )}
           </div>
         </div>
 
@@ -97,8 +91,14 @@ const NoteCard = ({ note, onEdit, onDelete, onUpdate }) => {
           </Button>
         </div>
       </div>
-      <Modal title="Delete" onClose={handleDeleteModalClose} isOpen={isDeleteModalOpen}>
-        <div className={styles.confirmationText}>Are you sure want to Delete {note.title} ?</div>
+      <Modal
+        title="Confirmation"
+        onClose={handleDeleteModalClose}
+        isOpen={isDeleteModalOpen}
+      >
+        <div className={styles.confirmationText}>
+          Are you sure want to Delete {note.title} ?
+        </div>
         <div className={styles.actionButton}>
           <Button onClick={handleDeleteModalClose} variant="outlined">
             Cancel

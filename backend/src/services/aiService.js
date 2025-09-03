@@ -9,11 +9,11 @@ const BASE_URL = "https://generativelanguage.googleapis.com/v1beta";
 // Generate summary using Gemini Pro
 async function generateSummary(transcript) {
   if (!API_KEY) {
-    throw new Error("Gemini API key not configured");
+    throw AppError("Gemini API key not configured", 400);
   }
 
   if (!transcript || transcript.trim().length === 0) {
-    throw new Error("No transcript provided for summarization");
+    throw AppError("No transcript provided for summarization", 400);
   }
 
   try {
@@ -42,13 +42,13 @@ async function generateSummary(transcript) {
     );
   } catch (error) {
     if (error.response?.status === 429) {
-      throw new Error("Rate limit exceeded. Please try again later.");
+      throw AppError("Rate limit exceeded. Please try again later.", error.response?.status);
     } else if (error.response?.status === 403) {
-      throw new Error("API key invalid or quota exceeded.");
+      throw AppError("API key invalid or quota exceeded.", error.response?.status);
     } else if (error.code === "ECONNABORTED") {
-      throw new Error("Request timeout. Please try again.");
+      throw AppError("Request timeout. Please try again.", error.response?.status);
     } else {
-      throw new Error(`Failed to generate summary: ${error.message}`);
+      throw AppError(`Failed to generate summary: ${error.message}`, error.response?.status);
     }
   }
 }
