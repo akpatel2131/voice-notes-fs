@@ -20,7 +20,7 @@ function App() {
       const fetchedNotes = await notesAPI.getAllNotes();
       setNotes(fetchedNotes);
     } catch (error) {
-      console.error('Error fetching notes:', error);
+      alert(error)
     } finally {
       setLoading(false);
     }
@@ -42,20 +42,16 @@ function App() {
         note._id === noteId ? updatedNote : note
       ));
     } catch (error) {
-      console.error('Error updating note:', error);
       alert('Failed to update note. Please try again.');
     }
   };
 
   const handleDeleteNote = async (noteId) => {
-    if (window.confirm('Are you sure you want to delete this note?')) {
-      try {
-        await notesAPI.deleteNote(noteId);
-        setNotes(prev => prev.filter(note => note._id !== noteId));
-      } catch (error) {
-        console.error('Error deleting note:', error);
-        alert('Failed to delete note. Please try again.');
-      }
+    try {
+      await notesAPI.deleteNote(noteId);
+      setNotes(prev => prev.filter(note => note._id !== noteId));
+    } catch (error) {
+      alert('Failed to delete note. Please try again.');
     }
   };
 

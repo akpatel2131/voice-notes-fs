@@ -1,18 +1,7 @@
-// services/notesService.js - Modified for Gemini AI
 const Note = require('../models/Note');
 const GeminiAIService = require('./aiService');
 const fs = require('fs').promises;
-const path = require('path');
-
-const createUploadsDir = async () => {
-  const uploadDir = path.join(__dirname, '../uploads/audio');
-  try {
-    await fs.access(uploadDir);
-  } catch {
-    await fs.mkdir(uploadDir, { recursive: true });
-  }
-};
-createUploadsDir();
+const generateLocalSummary = require('../utils/summary');
 
 const getAllNotes = async () => {
   return await Note.find().sort({ createdAt: -1 });
@@ -20,30 +9,11 @@ const getAllNotes = async () => {
 
 
 const createNote = async (title, duration, transcript = null) => {
-  const note = Note.create({
+  const note = await Note.create({
     title: title?.trim(),
     transcript: transcript,
     duration: Number(duration)
   });
-
-  console.log({note})
-  return note;
-};
-
-const createNoteFromTranscript = async (title, transcript, duration) => {
-  if (!transcript || transcript.trim().length === 0) {
-    throw new Error('Transcript is required to create a note');
-  }
-
-  const note = new Note({
-    title: title?.trim() || `Voice Note ${Date.now()}`,
-    transcript,
-    audioPath: 'browser-speech',
-    duration: Number(duration) || 0,
-    source: 'browser-speech',
-  });
-
-  await note.save();
   return note;
 };
 
@@ -90,48 +60,6 @@ const generateSummary = async (id) => {
   }
 };
 
-const generateLocalSummary = (transcript) => {
-  if (!transcript) return '';
-  if (transcript.length < 100) return transcript;
-
-  const sentences = transcript
-    .split(/[.!?]+/)
-    .map(s => s.trim())
-    .filter(s => s.length > 10);
-
-  if (sentences.length <= 2) {
-    return transcript;
-  }
-
-  // Word frequency map
-  const words = transcript.toLowerCase().split(/\s+/);
-  const wordFreq = {};
-  for (const word of words) {
-    wordFreq[word] = (wordFreq[word] || 0) + 1;
-  }
-
-  // Score sentences
-  const scoredSentences = sentences.map((sentence, index) => {
-    const sentenceWords = sentence.toLowerCase().split(/\s+/);
-    let score = 0;
-    for (const word of sentenceWords) {
-      score += wordFreq[word] || 0;
-    }
-    // Boost early sentences
-    if (index < 2) score *= 1.5;
-
-    return { sentence, score: score / sentenceWords.length };
-  });
-
-  // Pick top 3
-  const topSentences = scoredSentences
-    .sort((a, b) => b.score - a.score)
-    .slice(0, Math.min(3, sentences.length))
-    .map(item => item.sentence);
-
-  return topSentences.join('. ') + '.';
-};
-
 const deleteNote = async (id) => {
   const note = await Note.findById(id);
   if (!note) return null;
@@ -148,25 +76,10 @@ const deleteNote = async (id) => {
   return true;
 };
 
-const getNotesStats = async () => {
-  const totalNotes = await Note.countDocuments();
-  const notesWithSummaries = await Note.countDocuments({ summary: { $ne: null } });
-  const browserNotes = await Note.countDocuments({ audioPath: 'browser-speech' });
-
-  return {
-    total: totalNotes,
-    withSummaries: notesWithSummaries,
-    browserBased: browserNotes,
-    fileBased: totalNotes - browserNotes,
-  };
-};
-
 module.exports = {
   getAllNotes,
   createNote,
-  createNoteFromTranscript,
   updateNote,
   generateSummary,
   deleteNote,
-  getNotesStats,
 };

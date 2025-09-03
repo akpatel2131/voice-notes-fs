@@ -33,7 +33,7 @@ const VoiceRecorder = ({ onNoteCreated }) => {
       };
 
       recognition.onerror = (event) => {
-        console.error("Speech recognition error:", event.error);
+        alert("Speech recognition error:", event.error);
       };
 
       recognition.start();
@@ -63,7 +63,6 @@ const VoiceRecorder = ({ onNoteCreated }) => {
         onNoteCreated(newNote);
         setTitle("");
       } catch (error) {
-        console.error("Error creating note:", error);
         alert("Failed to save voice note. Please try again.");
       } finally {
         setDuration(0);
@@ -93,11 +92,6 @@ const VoiceRecorder = ({ onNoteCreated }) => {
             </div>
           )}
           {isProcessing && <div className={styles.processing}>Processing...</div>}
-          {transcript && !isRecording && (
-            <div className={styles.transcriptPreview}>
-              Transcript: "{transcript}"
-            </div>
-          )}
         </div>
 
         <button

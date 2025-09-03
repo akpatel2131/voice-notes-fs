@@ -1,6 +1,6 @@
 .button {
-  padding: var(--ye-spacing-rem-xsmall) var(--ye-spacing-rem-small);
-  border-radius: var(--ye-radius-small);
+  padding: var(--ye-spacing-rem-xsmall) var(--ye-spacing-rem-large);
+  border-radius: var(--ye-radius-xhuge);
   border: none;
   cursor: pointer;
   margin-top: var(--ye-spacing-rem-small);

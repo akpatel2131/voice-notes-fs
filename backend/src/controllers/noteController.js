@@ -6,7 +6,6 @@ const getAllNotes = async (req, res) => {
     const notes = await noteService.getAllNotes();
     res.json(notes);
   } catch (error) {
-    console.error('Get all notes error:', error);
     res.status(500).json({ error: error.message });
   }
 };
@@ -20,7 +19,6 @@ const createNote = async (req, res) => {
 
     res.status(201).json(note);
   } catch (error) {
-    console.error('Create note error:', error);
     res.status(500).json({ error: error.message });
   }
 };
@@ -41,7 +39,6 @@ const generateSummary = async (req, res) => {
     if (!summary) return res.status(404).json({ error: 'Note not found' });
     res.json({ summary });
   } catch (error) {
-    console.error('Summary generation error:', error);
     res.status(500).json({ error: error.message });
   }
 };

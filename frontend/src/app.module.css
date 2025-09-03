@@ -77,11 +77,12 @@ body {
   --color-grey: #9ca3a8;
   --color-grey-l1: #c2c4c7;
   --color-light-grey: #f4f4f4;
-  --color-primary: #007bff;
+  --color-primary: #3977c4;
   --color-negative: #dc2626;
+  --color-modal-background: rgba(14, 14, 14, 0.45);
   
   min-height: 100vh;
-  padding: 20px;
+  padding: var(--ye-spacing-rem-large);
 }
 
 .container {
