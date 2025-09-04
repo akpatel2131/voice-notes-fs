@@ -64,17 +64,6 @@ const deleteNote = async (id) => {
     const note = await Note.findById(id);
     if (!note) throw AppError("Note not found", 404);
 
-    if (note.audioPath && note.audioPath !== "browser-speech") {
-      try {
-        await fs.unlink(note.audioPath);
-      } catch (fileError) {
-        console.error(
-          "Error deleting audio file:",
-          fileError.message || fileError
-        );
-      }
-    }
-
     await Note.findByIdAndDelete(id);
     return true;
   } catch (error) {

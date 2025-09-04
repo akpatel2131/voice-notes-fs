@@ -7,15 +7,6 @@ const routes = require("./routes/index");
 const { errorMessage } = require("./utils/message");
 dotenv.config();
 
-mongoose
-  .connect(process.env.MONGODB_URI)
-  .then(() => {
-    console.log("Connected to MongoDB");
-  })
-  .catch((error) => {
-    console.error("Error connecting to MongoDB:", error);
-  });
-
 app.use(cors());
 app.use(express.json());
 
@@ -28,5 +19,14 @@ app.use((req, res) => {
 app.use((error, req, res, next) => {
   res.status(500).json(errorMessage("Something went wrong!"));
 });
+
+mongoose
+  .connect(process.env.MONGODB_URI)
+  .then(() => {
+    console.log("Connected to MongoDB");
+  })
+  .catch((error) => {
+    console.error("Error connecting to MongoDB:", error);
+  });
 
 module.exports = app;
